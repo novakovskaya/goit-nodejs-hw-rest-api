@@ -1,11 +1,19 @@
 const express = require('express');
 
 const { authorization, validation, upload } = require('../../middlewares');
-const { joiUserSchema, joiSubscriptionSchema } = require('../../models/user');
+const {
+  joiUserSchema,
+  joiSubscriptionSchema,
+  verifyEmailSchema,
+} = require('../../models/user');
 const { ctrlWrapper } = require('../../helpers');
 const controllers = require('../../controllers/users');
 
 const router = express.Router();
+
+router.get('/current', authorization, ctrlWrapper(controllers.getCurrent));
+
+router.get('/verify/:verificationToken', ctrlWrapper(controllers.verifyEmail));
 
 router.post(
   '/signup',
@@ -21,7 +29,11 @@ router.post(
 
 router.post('/logout', authorization, ctrlWrapper(controllers.logout));
 
-router.get('/current', authorization, ctrlWrapper(controllers.getCurrent));
+router.post(
+  '/verify',
+  validation(verifyEmailSchema),
+  ctrlWrapper(controllers.reVerifyUser)
+);
 
 router.patch(
   '/:id/subscription',
